@@ -4,7 +4,8 @@
   "description": "从零开始构建typescript开发项目",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "changelog": "conventional-changelog -p angular -i CHANGELOG.md -s -r 0 && git add CHANGELOG.md"
   },
   "repository": {
     "type": "git",
@@ -19,5 +20,22 @@
   "bugs": {
     "url": "https://github.com/SUN-LG/typescript-starter/issues"
   },
-  "homepage": "https://github.com/SUN-LG/typescript-starter#readme"
+  "homepage": "https://github.com/SUN-LG/typescript-starter#readme",
+  "devDependencies": {
+    "@commitlint/cli": "^9.1.1",
+    "@commitlint/config-conventional": "^9.1.1",
+    "conventional-changelog-cli": "^2.1.0",
+    "cz-customizable": "^6.3.0",
+    "husky": "^4.2.5"
+  },
+  "config": {
+    "commitizen": {
+      "path": "./node_modules/cz-customizable"
+    }
+  },
+  "husky": {
+    "hooks": {
+      "commit-msg": "commitlint -E HUSKY_GIT_PARAMS"
+    }
+  }
 }
