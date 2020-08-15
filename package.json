@@ -1,0 +1,23 @@
+{
+  "name": "typescript-starter",
+  "version": "1.0.0",
+  "description": "从零开始构建typescript开发项目",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SUN-LG/typescript-starter.git"
+  },
+  "keywords": [
+    "typescript",
+    "starter"
+  ],
+  "author": "SLG",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/SUN-LG/typescript-starter/issues"
+  },
+  "homepage": "https://github.com/SUN-LG/typescript-starter#readme"
+}
