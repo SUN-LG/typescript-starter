@@ -7,6 +7,7 @@
 - Git commit Message
 - Typescript
 - Eslint
+- Prettier
 
 
 ### Init
@@ -54,7 +55,7 @@
 }
 ```
 
-> 温馨提示：这里没有配置 `module`信息，因为默认输出 CommonJS规范，更多关于 TypeScript 配置信息可查看 [Typescript 官方文档 / 编译选项](https://www.tslang.cn/docs/handbook/compiler-options.html)。如果对于 CommonJS 和 ES6 规范的区别不是很清晰，这里有一篇非常好的文档[ES modules: A cartoon deep-dive](https://hacks.mozilla.org/2018/03/es-modules-a-cartoon-deep-dive/)。
+> 温馨提示：这里没有配置 `module`信息，因为默认输出 CommonJS规范，更多关于 TypeScript 配置信息可查看 [Typescript 官方文档 / 编译选项](https://www.tslang.cn/docs/handbook/compiler-options.html)。如果对于 CommonJS 和 ES Moudle 规范的区别不是很清晰，这里有一篇非常好的文档[ES modules: A cartoon deep-dive](https://hacks.mozilla.org/2018/03/es-modules-a-cartoon-deep-dive/)、[ES6 modules](https://github.com/rollup/rollup/wiki/ES6-modules)、以及 [pkg.module](https://github.com/rollup/rollup/wiki/pkg.module)。
 
 同时在根目录下新建 `gulpfile.js` 文件：
 
@@ -226,3 +227,121 @@ D:\workspace\learn\typescript-starter\src\index.ts
 - [ESLint 中文网](https://cn.eslint.org/)
 - [typescript-eslint](https://github.com/typescript-eslint/typescript-eslint)
 - [Getting Started - Linting your TypeScript Codebase](https://github.com/typescript-eslint/typescript-eslint/blob/master/docs/getting-started/linting/README.md)
+
+### Prettier
+
+#### Prettier 背景
+
+Prettier 是一个统一代码风格的工具，如果你不清楚为什么需要使用 Prettier，可以查看 [Why Prettier?](https://prettier.io/docs/en/why-prettier.html)。可能很多人存疑，ESLint 已经能够规范我们的代码风格，为什么还需要 Prettier？在[Prettier Vs Linters](https://prettier.io/docs/en/comparison.html) 中详细说明了两者的区别，Linters 有两种类型的规则：
+
+- 格式规则（Formatting rules）：例如 [max-len](https://eslint.org/docs/rules/max-len)、[keyword-spacing](https://eslint.org/docs/rules/keyword-spacing)以及 [no-mixed-spaces-and-tabs](https://eslint.org/docs/rules/no-mixed-spaces-and-tabs) 等
+- 质量规则（Code-quality rules）：例如 [no-unused-vars](https://eslint.org/docs/rules/no-unused-vars)、[no-implicit-globals](https://eslint.org/docs/rules/no-implicit-globals) 以及 [prefer-promise-reject-errors](https://eslint.org/docs/rules/prefer-promise-reject-errors) 等
+
+ESLint 的规则校验同时包含了 **格式规则** 和 **质量规则**，但是需要注意的是大部分情况下只有 **格式规则** 可以通过 `--fix` 或 vscode 的 Auto Fix 功能一键修复，而 **质量问题** 更多的是代码错误，往往需要手动修复。因此 **格式规则** 并不是必须的。Prettier 和 ESLint 的区别在于 Prettier 专注于统一的 **格式规则**，从而减轻 ESLint 在 **格式规则** 上的校验，而 **质量规则** 则交给专业的 ESlint 进行处理。总结一句话就是：Prettier for formatting and linters for catching bugs!（ESLint 是必须的，Prettier 是可选的！）
+
+需要注意的是如果 ESlint 和 Prettier 配合使用 **格式规则** 会有重复，导致冲突，那么在编辑器中使用 Save Auto Fix 时会让你的一键格式化哭笑不得。此时应该让两者把各自注重的规则功能区分开，使用 ESLint 校验 **质量规则** 而 **格式规则** 则交给 Prettier 进行处理，更多信息参考：[Integrating with Linters](https://prettier.io/docs/en/option-philosophy.html)，个人认为了解一个产品设计的**哲学**能更好的指导你使用该产品。
+
+#### Prettier 配置
+
+首先安装 Prettier 及所需的依赖：
+
+```shell
+npm i  prettier eslint-config-prettier --save-dev
+```
+
+其中：`[eslint-config-prettier](https://github.com/prettier/eslint-config-prettier)`：用于解决 ESlint 和 Prettier 配合使用时，冲突的 **格式规则**问题。其原理就是关闭 ESLint中的一些格式规则，除此之外还包括关闭 `@typescript-eslint/eslint-plugin`、`eslint-plugin-babel`、`eslint-plugin-react`、`eslint-plugin-vue`、`eslint-plugin-standard` 等格式规则。
+理论上而言，在项目中开启了 ESLint 的 `extends` 中设置了带有格式规则校验的规则集，那么就需要通过 `eslint-config-prettier` 插件关闭可能产生冲突的相对应的格式规则：
+
+```javascript
+{
+  "extends": [
+    "plugin:@typescript-eslint/recommended",
+    // 用于关闭 ESLint 相关的格式规则集，具体可查看 https://github.com/prettier/eslint-config-prettier/blob/master/index.js
+    "prettier",
+    // 用于关闭 @typescript-eslint/eslint-plugin 插件相关的格式规则集，具体可查看 https://github.com/prettier/eslint-config-prettier/blob/master/%40typescript-eslint.js
+    "prettier/@typescript-eslint",
+  ]
+}
+```
+
+配置完成之后，可以通过[命令行接口](https://prettier.io/docs/en/cli.html)运行 Prettier:
+
+```javascript
+"scripts": {
+  "prettier": "prettier src test --write",
+},
+```
+
+`--write` 参数类似于 ESLint 中的 `--fix`（在 ESLint 中使用该参数还是需要谨慎哈，建议还是使用 VS Code 的 Save Auto Fix 功能），用于自动修复格式错误。此时书写的错误格式的代码：
+```javascript
+class Greeter {
+  public greeting: string;
+  public constructor(message: string) {
+    this.greeting = message;
+  }
+  public greet() {
+    return "Hello, " + this.greeting;
+  }
+}
+
+
+
+
+export default Greeter;
+```
+
+执行 `npm run prettier` 进行格式修复：
+
+```shell
+$ npm run prettier
+
+> typescript-starter@1.0.0 prettier D:\workspace\learn\typescript-starter
+> prettier src --write
+
+src\index.ts 390ms
+```
+
+修复之后的文件如下：
+
+```javascript
+class Greeter {
+  public greeting: string;
+  public constructor(message: string) {
+    this.greeting = message;
+  }
+  public greet() {
+    return "Hello, " + this.greeting;
+  }
+}
+
+export default Greeter;
+```
+
+需要注意的是，如果某些规则集没有对应的 `eslint-config-prettier/xxx` 关闭配置，那么可以先通过 [CLI helper tool](https://github.com/prettier/eslint-config-prettier#cli-helper-tool) 检测是否有冲突的格式规则集生效，然后通过手动配置 `eslintrc.js` 的形式进行关闭 （例如本项目中的 `plugin:@typescript-eslint/@recommended` 可能存在冲突）
+
+例如把 `eslint-config-prettier` 的配置去除，此时进行检查重复规则：
+
+```shell 
+$ npx eslint --print-config src/index.ts | npx eslint-config-prettier-check
+The following rules are unnecessary or might conflict with Prettier:
+
+- @typescript-eslint/no-extra-semi
+```
+
+此时假设 `eslint-config-prettier` 没有类似的关闭格式规则集，那么可以通过配置 `.eslintrc.js` 的形式自己关闭相应冲突的格式规则。
+
+```javascript
+  rules: {
+    '@typescript-eslint/no-extra-semi': 'off'
+  }
+```
+
+> 温馨提示：ESLint 可以对不同的文件支持不同的规则校验，因此 `--print-config` 的形式只能对单个文件潜在的冲突进行检查。通常由于整个项目都是一套规则，因此只需要校验一个文件潜在的冲突即可。
+
+#### Prettier vscode 插件
+
+通过命令行接口 `--write` 的形式可以进行格式自动修复，但是类似 ESLint，我们更希望项目在实时编辑的时候可以通过保存就自动格式化代码（鬼知道 `--fix` 以及 `--write` 格式了什么文件，当然更希望通过肉眼的形式立即感知格式化），此时可以通过配置 VS Code 的 [Prettier - Code formatter](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode) 插件进行 Save Auto Fix，具体的配置查看插件文档。
+
+#### Prettier Pre-Commit Hook
+
+和 ESLint 一样，尽管可能配置了 Prettier 的自动修复格式脚本 以及 VS Code 插件，但是无法确保格式遗漏的情况，因此还需要一层保障能够确保代码提交之前所有的代码能够进行 Prettier 格式化，这个配置将在 Lint Staged 中讲解，更多配置方案也可以查看 [Prettier - Pre-commit Hook](https://prettier.io/docs/en/precommit.html)。
