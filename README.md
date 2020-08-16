@@ -6,6 +6,7 @@
 - Init
 - Git commit Message
 - Typescript
+- Eslint
 
 
 ### Init
@@ -123,3 +124,105 @@ gulp.task("default", function () {
 ```
 
 > 温馨提示： 对于工具包使用全量引入的方式并不是一个好的选择，可以通过具体的工具方法进行按需引入。
+
+### ESlint
+
+#### 背景
+
+TypeScript 的代码检查工具主要有 TSLint 和 ESLint 两种。早期的 TypeScript 项目一般采用 TSLint 进行检查，TSLint 和 TypeScript 采用同样的 AST 格式进行编译，但主要问题是对于 JavaScript 生态的项目支持不够友好，因此 TypeScript 团队在 2019 年宣布全面转向 ESLint，更多关于转向 ESLint 的原因可查看：
+
+- <https://medium.com/palantir/tslint-in-2019-1a144c2317a9>
+- <https://github.com/microsoft/TypeScript/issues/30553>
+
+TypeScript 和 ESlint 使用不同的AST进行解析，因此使用ESlint支持 Typscript 代码检测需要额外的[自定义解析器](https://cn.eslint.org/docs/developer-guide/working-with-custom-parsers)（Custome Parsers，Eslint 的自定义解析器功能需基于[ESTree](https://github.com/estree/estree)），目的是为了能够解析 Typescript 语法并转换成与 ESlint兼容的AST。[@typescript-eslint](https://github.com/typescript-eslint/typescript-eslint#getting-started--installation)在这样的背景下诞生，它会处理所有特定的ESLint配置并调用[@typescript-eslint/typescript-estree](https://github.com/typescript-eslint/typescript-eslint/tree/master/packages/typescript-estree)生成 ESTreet-compatible AST (需要注意，仅仅是兼容ESLint，也能兼容 Prettier)
+
+`@typecsript-eslint` 是一个 Monorepo 体系结构的仓库，采用 [learn](https://github.com/lerna/lerna) 进行设计，除了上述提到的NPM包以外，还包含以下两个重要的NPM包：
+
+- [@typescript-eslint/eslint-plugin](https://github.com/typescript-eslint/typescript-eslint/tree/master/packages/eslint-plugin), 配合`@typescript-eslint/parser`一起使用的 ESLint 插件，可以设置 Typescript 的校验规则。
+- [@typescript-eslint/eslint-plugin-tslint](https://github.com/typescript-eslint/typescript-eslint/tree/master/packages/eslint-plugin-tslint): TSLint 向 ESLint 迁移的插件。
+
+> 温馨提示：如果你正在使用 TSLint，并且你希望兼容 ESLint 或者向 ESLint 进行过渡（TSLint 和 ESLint 并存）， 可查看 [Migrating from TSLint to ESLint](https://github.com/typescript-eslint/typescript-eslint#migrating-from-tslint-to-eslint)。除此之外，以上所介绍的这些包发布时版本一致（为了联合使用的适配性），如果还有什么需要注意的话你可能需要关心一下 `@typescript-eslint` 对于 TypeScript 和 ESLint 的版本支持性，更多可查看该库包的 @typescript-eslint/parser 的仓库信息。
+
+#### 配置
+
+从背景介绍中可以理解，对于全新的 Typescript 项目（直接抛弃 TSLint）需要包含解析能够解析TS的解析器 @typescript-eslint/parser，和校验规则的插件 @typescript-eslint/eslint-plugin，这里需要在项目中就进行安装：
+
+```shell
+npm i --save-dev eslint @typescript-eslint/parser @typescript-eslint/eslint-plugin
+```
+
+在根目录新建 `.eslintrc.js` 配置文件，设置一下配置：
+```javascript
+  module.exports = {
+    root: true,
+    parser: '@typescript-eslint/parser',
+    plugins: [
+      '@typescript-eslint'
+    ],
+    extends: [
+      'eslint:recommended',
+      'plugin:@typescript-eslint/recommended'
+    ]
+  }
+```
+
+其中：
+
+- `parser: '@typescript-eslint/parser'`：使用 ESlint 解析 Typescript 语法
+- `plugins: ['@typescript-eslint']`: 加载 `@typescript-eslint/eslint-plugin` ESLint 插件，用于配置 Typescript 校验规则
+- `extends: [...]`: 在ESLint中设置[共享规则配置](https://cn.eslint.org/docs/developer-guide/shareable-configs)，其中`eslint:recommended` 是 ESLint 内置的推荐校验规则配置（也被称作最佳规则实践），`plugin:@typescript-eslint/recommended` 是类似于 `eslint:recommended` 的 TypeScript 推荐校验规则配置。
+
+> 温馨提示：如果你稍微阅读一下 recommended 源码你会发现，其内部可以理解为推荐校验规则的集合。因此如果想基于 `@typescript-eslint/eslint-plugin` 进行自定义规则，则可以参考[TypeScript Supported Rules](https://github.com/typescript-eslint/typescript-eslint/tree/master/packages/eslint-plugin#supported-rules)。
+> 温馨提示：[为什么在ESLint输出中看不到TS提示的错误？](https://github.com/typescript-eslint/typescript-eslint/blob/master/docs/getting-started/linting/FAQ.md#why-dont-i-see-typescript-errors-in-my-eslint-output) ESLint 不会复制ts提供的错误信息，因为那样做会减慢ESLint的运行速度，并且重复输出了TS已经提供的错误信息。
+
+配置完成后在 `package.json` 中设置校验命令
+
+```javascript
+"lint": "eslint src",
+```
+
+此时如果在 `src` 目录下书写错误的语法，执行 `npm run lint` 就会输出错误信息：
+
+```shell
+$ npm run lint
+
+> typescript-starter@1.0.0 lint D:\workspace\learn\typescript-starter
+> eslint src
+
+
+D:\workspace\learn\typescript-starter\src\index.ts
+  6:3  warning  Missing return type on function  @typescript-eslint/explicit-module-boundary-types
+
+✖ 1 problem (0 errors, 1 warning)
+```
+
+> 温馨提示：输出的错误信息是通过 [ESLint Formatters](https://cn.eslint.org/docs/user-guide/formatters/) 生成，查看 ESLint 源码并调试可发现默认采用的是 [stylish](https://cn.eslint.org/docs/user-guide/formatters/#stylish) formatter。
+
+#### ESlint vscode 插件
+
+如果不使用插件，很难发现写的代码可能存在 TypeScript 格式错误（除非手动 `npm run lint` 或监听代码的变更并实时运行 `npm run lint`），此时可以通过 VS Code 插件进行处理。安装 ESLint 插件后可进行代码的实时提示，具体如下图所示：
+
+![eslint-error](eslint-error.jpg)
+
+此时可以发现之前执行 `lint` 命令的错误通过插件的形式可实时在 VS Code 编辑器中进行显示。除此之外，一些简单的 ESLint 格式错误（例如 多余的`;` 等）可通过配置 Save Auto Fix 进行保存自动格式化处理。具体 VS Code 的配置可参考 [ESLint 插件](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint)的文档说明，这边应该需要进行如下配置：
+``` javascript
+"editor.codeActionsOnSave": {
+  "source.fixAll": true,
+  "source.fixAll.eslint": true
+}
+```
+
+> 温馨提示：VS Code 的配置分为两种类型（用户和工作区），针对上述通用的配置主要放在用户里，针对不同项目的不同配置则需要放入工作区进行处理。
+
+## 文档
+
+- [Npm 官方文档](https://docs.npmjs.com/)
+- [使用 NPM 发布和使用 CLI 工具](https://juejin.im/post/5eb89053e51d454de54db501)
+- [Cz 工具集使用介绍](https://juejin.im/post/5cc4694a6fb9a03238106eb9)（强烈推荐阅读）
+- [TypeScript 中文网](https://www.tslang.cn/)
+- [tsconfig.json 编译选项](https://www.tslang.cn/docs/handbook/compiler-options.html)
+- [gulp-typescript](https://github.com/ivogabe/gulp-typescript)
+- [ES modules: A cartoon deep-dive](https://hacks.mozilla.org/2018/03/es-modules-a-cartoon-deep-dive/)（强烈推荐阅读）
+- [ESLint 中文网](https://cn.eslint.org/)
+- [typescript-eslint](https://github.com/typescript-eslint/typescript-eslint)
+- [Getting Started - Linting your TypeScript Codebase](https://github.com/typescript-eslint/typescript-eslint/blob/master/docs/getting-started/linting/README.md)
