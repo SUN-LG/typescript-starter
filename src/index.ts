@@ -3,7 +3,7 @@ class Greeter {
   public constructor(message: string) {
     this.greeting = message;
   }
-  public greet() {
+  public greet(): string {
     return "Hello, " + this.greeting;
   }
 }

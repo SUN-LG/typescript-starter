@@ -3,14 +3,12 @@
 
 ## 配置环境
 
-- Init
+本项目配置主要包含：
 - Git commit Message
 - Typescript
 - Eslint
 - Prettier
 
-
-### Init
 
 采用 NPM 可以对任何普通的项目进行初始化操作，执行 [`npm init`](https://docs.npmjs.com/cli/init) 会在项目根目录下生成 `package.json` 包描述文件。
 
@@ -18,23 +16,48 @@
 
 ### Git Commit Message
 
-[Commitizen](https://github.com/commitizen/cz-cli) 是一个规范Git提交说明（Commit Message）的CLI工具，具体配置可查看[Cz 工具集使用介绍](https://juejin.im/post/5cc4694a6fb9a03238106eb9)。本项目中主要使用了以下功能：
+[Commitizen](https://github.com/commitizen/cz-cli) 是一个规范Git提交说明（Commit Message）的CLI工具，具体配置可查看[Cz 工具集使用介绍](https://juejin.im/post/5cc4694a6fb9a03238106eb9)。本项目中主要使用了以下工具：
 
 - [cz-customizable](https://github.com/leonardoanalista/cz-customizable)
 - [commitlint](https://commitlint.js.org/#/)
 - [conventional-changelog](https://github.com/conventional-changelog/conventional-changelog/tree/master/packages/conventional-changelog)]
 
-配置以后得到以下功能：
+配置以后得到以下一些特性：
 
 - 使用 `git cz` 代替 `git commit` 提交符合 Angular 规范的 Commit Message
 - 代码提交前会通过 [husky](https://github.com/typicode/husky) 配合 git hook 进行提交信息校验，提交信息不符合 Angular 规范，则会失败，终止提交。
 - 执行 `npm run changelog` 会在跟目录生成 `CHANGELOG.md` 版本日志
 
+例如当你提交了一个不符合规范的 Commit Message（此时提交失败）：
+
+```javascript
+PS C:\Code\Git\algorithms> git commit -m "这是一个不符合规范的 Commit Message"
+husky > commit-msg (node v12.13.1)
+⧗   input: 这是一个不符合规范的 Commit Message
+✖   subject may not be empty [subject-empty]
+✖   type may not be empty [type-empty]
+✖   found 2 problems, 0 warnings
+ⓘ   Get help: https://github.com/conventional-changelog/commitlint/#what-is-commitlint
+husky > commit-msg hook failed (add --no-verify to bypass)
+```
+
 > 温馨提示：如果不知道什么是 CLI （命令行接口），可查看 [使用 NPM 发布和使用 CLI 工具](https://juejin.im/post/5eb89053e51d454de54db501)。
 
 ### Typescript
 
-本项目会构建输出 CommonJS 工具包（npm包）供外部使用，采用 Typescript 设计并输出声明文件，有助于外部更好的使用该资源包。Typescript 编译采用官方推荐的 Gulp 工具，配合 [gulp-typescript](https://github.com/ivogabe/gulp-typescript) 和 [tsconfig.json](https://www.tslang.cn/docs/handbook/tsconfig-json.html) 配置文件，可快速进行项目构建。在根目录下新建 `tsconfig.json` 文件并新增以下配置：
+本项目会构建输出 CommonJS 工具包（npm包）供外部使用，采用 Typescript 设计并输出声明文件，有助于外部更好的使用该资源包。
+
+TypeScript 的构建方式有很多种，除了原生编译器 tsc 以外，还包括 Webpack、Rollup、 Babel 以及 Gulp 等（更多构建工具的集成可查看 [Integrating with Build Tools](https://www.typescriptlang.org/docs/handbook/integrating-with-build-tools.html):
+
+- webpack 主要用于页面应用模块化构建，使用webpack构建后增加库的体积，因此工具库制作使用webpack完全是“杀鸡用牛刀”
+- Rollup 是一个轻量的构建构建库的打包器，支持- Babel 对应Typescript可以使用 [@babel/preset-typescript](https://babeljs.io/docs/en/babel-preset-typescript) 去除 TypeScript 类型标记，但是做不到类型编译检查，更多关于 Babel 对于 TypeScript 支持的限制可查看 [@babel/plugin-transform-typescript - Caveats](https://www.babeljs.cn/docs/babel-plugin-transform-typescript#caveats)。
+- Gulp 是一个非常轻量的，并且也是Typescript官方推荐的构建工具，具体可以查看 [TypeScript - Building](https://github.com/microsoft/TypeScript#building)，简单的 Gulp 配置可查看 [TypeScript 中文网 - Gulp](https://www.tslang.cn/docs/handbook/gulp.html)。
+
+
+#### Typescript 配置
+
+Typescript 编译采用官方推荐的 Gulp 工具，配合 [gulp-typescript](https://github.com/ivogabe/gulp-typescript) 和 [tsconfig.json](https://www.tslang.cn/docs/handbook/tsconfig-json.html) 配置文件，可快速进行项目构建。在根目录下新建 `tsconfig.json` 文件并新增以下配置： [Tree Shaking](https://github.com/rollup/rollup) 以及可构建输出 [ES Module](https://github.com/rollup/rollup/wiki/ES6-modules) 的特性使得它被 tsdx、microbundle 甚至 Vue 等广泛使用。
+
 
 ```javascript
 {
@@ -128,7 +151,7 @@ gulp.task("default", function () {
 
 ### ESlint
 
-#### 背景
+#### ESLint 背景
 
 TypeScript 的代码检查工具主要有 TSLint 和 ESLint 两种。早期的 TypeScript 项目一般采用 TSLint 进行检查，TSLint 和 TypeScript 采用同样的 AST 格式进行编译，但主要问题是对于 JavaScript 生态的项目支持不够友好，因此 TypeScript 团队在 2019 年宣布全面转向 ESLint，更多关于转向 ESLint 的原因可查看：
 
@@ -144,7 +167,7 @@ TypeScript 和 ESlint 使用不同的AST进行解析，因此使用ESlint支持 
 
 > 温馨提示：如果你正在使用 TSLint，并且你希望兼容 ESLint 或者向 ESLint 进行过渡（TSLint 和 ESLint 并存）， 可查看 [Migrating from TSLint to ESLint](https://github.com/typescript-eslint/typescript-eslint#migrating-from-tslint-to-eslint)。除此之外，以上所介绍的这些包发布时版本一致（为了联合使用的适配性），如果还有什么需要注意的话你可能需要关心一下 `@typescript-eslint` 对于 TypeScript 和 ESLint 的版本支持性，更多可查看该库包的 @typescript-eslint/parser 的仓库信息。
 
-#### 配置
+#### ESLint 配置
 
 从背景介绍中可以理解，对于全新的 Typescript 项目（直接抛弃 TSLint）需要包含解析能够解析TS的解析器 @typescript-eslint/parser，和校验规则的插件 @typescript-eslint/eslint-plugin，这里需要在项目中就进行安装：
 
@@ -199,6 +222,29 @@ D:\workspace\learn\typescript-starter\src\index.ts
 
 > 温馨提示：输出的错误信息是通过 [ESLint Formatters](https://cn.eslint.org/docs/user-guide/formatters/) 生成，查看 ESLint 源码并调试可发现默认采用的是 [stylish](https://cn.eslint.org/docs/user-guide/formatters/#stylish) formatter。
 
+为了防止不需要ESLint校验了一些不需要校验的文件（例如配置文件，types文件夹下的文件），可以通过 `.eslintignore` 文件进行配置：
+
+```javascript
+# gulp
+gulpfile.js
+
+# eslint
+.eslintrc.js
+
+# commitizen
+commitlint.config.js
+.cz-config.js
+
+#jest
+jest.config.js
+
+#build
+dist
+types
+```
+
+
+
 #### ESlint vscode 插件
 
 如果不使用插件，很难发现写的代码可能存在 TypeScript 格式错误（除非手动 `npm run lint` 或监听代码的变更并实时运行 `npm run lint`），此时可以通过 VS Code 插件进行处理。安装 ESLint 插件后可进行代码的实时提示，具体如下图所示：
@@ -215,18 +261,6 @@ D:\workspace\learn\typescript-starter\src\index.ts
 
 > 温馨提示：VS Code 的配置分为两种类型（用户和工作区），针对上述通用的配置主要放在用户里，针对不同项目的不同配置则需要放入工作区进行处理。
 
-## 文档
-
-- [Npm 官方文档](https://docs.npmjs.com/)
-- [使用 NPM 发布和使用 CLI 工具](https://juejin.im/post/5eb89053e51d454de54db501)
-- [Cz 工具集使用介绍](https://juejin.im/post/5cc4694a6fb9a03238106eb9)（强烈推荐阅读）
-- [TypeScript 中文网](https://www.tslang.cn/)
-- [tsconfig.json 编译选项](https://www.tslang.cn/docs/handbook/compiler-options.html)
-- [gulp-typescript](https://github.com/ivogabe/gulp-typescript)
-- [ES modules: A cartoon deep-dive](https://hacks.mozilla.org/2018/03/es-modules-a-cartoon-deep-dive/)（强烈推荐阅读）
-- [ESLint 中文网](https://cn.eslint.org/)
-- [typescript-eslint](https://github.com/typescript-eslint/typescript-eslint)
-- [Getting Started - Linting your TypeScript Codebase](https://github.com/typescript-eslint/typescript-eslint/blob/master/docs/getting-started/linting/README.md)
 
 ### Prettier
 
@@ -345,3 +379,89 @@ The following rules are unnecessary or might conflict with Prettier:
 #### Prettier Pre-Commit Hook
 
 和 ESLint 一样，尽管可能配置了 Prettier 的自动修复格式脚本 以及 VS Code 插件，但是无法确保格式遗漏的情况，因此还需要一层保障能够确保代码提交之前所有的代码能够进行 Prettier 格式化，这个配置将在 Lint Staged 中讲解，更多配置方案也可以查看 [Prettier - Pre-commit Hook](https://prettier.io/docs/en/precommit.html)。
+
+
+### Lint Staged
+
+使用[commitlint](https://commitlint.js.org/#/)可以防止生成不规范的 Git Commit Message，从而阻止用户进行Git代码提交。单随之项目的增大，全量代码检测则会成为一个问题。[Lint-Stated](https://github.com/okonet/lint-staged)，可以在用户提交代码之前，使用ESLint检测Git暂存区的代码（`git add` 之后的发生变化的文件），一旦存在 💩 一样不符合校验规则的代码，则可以终止提交行为。根据官方文档执行以下命令自动生成配置项信息：
+
+```shell
+npm mrm lint-staged
+```
+
+需要注意默认生成的配置文件是针对 JavaScript 环境的，手动修改 `package.json` 中的配置信息：
+
+```javascript
+"husky": {
+  "hooks": {
+    "pre-commit": "lint-staged"
+  }
+},
+"lint-staged": {
+  // 这里需要注意lint命令脚本的 --max-warnings 0
+  // 否则就算存在 warning 也不会终止提交行为
+  "*.ts": "npm run lint"
+}
+```
+
+此时只会检测git暂存区的代码，如果有问题，则会提示错误信息并提交失败：
+
+```javascript
+$ git commit -m 'test lint-staged'
+husky > pre-commit (node v12.10.0)
+[STARTED] Preparing...
+[SUCCESS] Preparing...
+[STARTED] Running tasks...
+[STARTED] Running tasks for *.ts
+[STARTED] npm run lint
+[FAILED] npm run lint [FAILED]
+[FAILED] npm run lint [FAILED]
+[SUCCESS] Running tasks...
+[STARTED] Applying modifications...
+[SKIPPED] Skipped because of errors from tasks.
+[STARTED] Reverting to original state because of errors...
+[SUCCESS] Reverting to original state because of errors...
+[STARTED] Cleaning up...
+[SUCCESS] Cleaning up...
+
+× npm run lint:
+ESLint found too many warnings (maximum: 0).
+npm ERR! code ELIFECYCLE
+npm ERR! errno 1
+npm ERR! typescript-starter@1.0.0 lint: `eslint src --cache --max-warnings 0 "D:/workspace/learn/typescript-starter/src/index.ts"`
+npm ERR! Exit status 1
+npm ERR!
+npm ERR! Failed at the typescript-starter@1.0.0 lint script.
+npm ERR! This is probably not a problem with npm. There is likely additional logging 
+output above.
+
+npm ERR! A complete log of this run can be found in:
+npm ERR!     C:\Users\Shinelon\AppData\Roaming\npm-cache\_logs\2020-08-16T09_22_12_920Z-debug.log
+
+> typescript-starter@1.0.0 lint D:\workspace\learn\typescript-starter
+> eslint src --cache --max-warnings 0 "D:/workspace/learn/typescript-starter/src/index.ts"
+
+
+D:\workspace\learn\typescript-starter\src\index.ts
+  6:3  warning  Missing return type on function  @typescript-eslint/explicit-module-boundary-types
+
+✖ 1 problem (0 errors, 1 warning)
+
+husky > pre-commit hook failed (add --no-verify to bypass)
+```
+
+husky 在 `package.json` 中配置了 `pre-commit` 和 `commit-msg` 两个[Git 钩子](https://git-scm.com/book/en/v2/Customizing-Git-Git-Hooks)，pre-commit 钩子会优先执行ESLint校验，如果校验失败终止运行。pre-commit 钩子执行完后会继续执行 commit-msg 钩子校验 Git Commit Message 是否符合规范，如果不符合规范终止提交。
+
+## 文档
+
+- [Npm 官方文档](https://docs.npmjs.com/)
+- [使用 NPM 发布和使用 CLI 工具](https://juejin.im/post/5eb89053e51d454de54db501)
+- [Top 10 JavaScript errors from 1000+ projects (and how to avoid them)](https://rollbar.com/blog/top-10-javascript-errors/)
+- [Cz 工具集使用介绍](https://juejin.im/post/5cc4694a6fb9a03238106eb9)（强烈推荐阅读）
+- [TypeScript 中文网](https://www.tslang.cn/)
+- [tsconfig.json 编译选项](https://www.tslang.cn/docs/handbook/compiler-options.html)
+- [gulp-typescript](https://github.com/ivogabe/gulp-typescript)
+- [ES modules: A cartoon deep-dive](https://hacks.mozilla.org/2018/03/es-modules-a-cartoon-deep-dive/)（强烈推荐阅读）
+- [ESLint 中文网](https://cn.eslint.org/)
+- [typescript-eslint](https://github.com/typescript-eslint/typescript-eslint)
+- [Getting Started - Linting your TypeScript Codebase](https://github.com/typescript-eslint/typescript-eslint/blob/master/docs/getting-started/linting/README.md)

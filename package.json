@@ -7,7 +7,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "changelog": "rimraf CHANGELOG.md && conventional-changelog -p angular -i CHANGELOG.md -s",
     "build": "npm run lint && npm run prettier && rimraf dist types && gulp",
-    "lint": "eslint src --max-warnings 0",
+    "lint": "eslint src --cache --max-warnings 0",
     "prettier": "prettier src --write"
   },
   "repository": {
@@ -40,6 +40,7 @@
     "gulp": "^4.0.2",
     "gulp-typescript": "^6.0.0-alpha.1",
     "husky": "^4.2.5",
+    "lint-staged": "^10.2.11",
     "merge2": "^1.4.1",
     "prettier": "^2.0.5",
     "rimraf": "^3.0.2",
@@ -52,7 +53,11 @@
   },
   "husky": {
     "hooks": {
-      "commit-msg": "commitlint -E HUSKY_GIT_PARAMS"
+      "commit-msg": "commitlint -E HUSKY_GIT_PARAMS",
+      "pre-commit": "lint-staged"
     }
+  },
+  "lint-staged": {
+    "*.ts": ["npm run lint", "npm run prettier"]
   }
 }
