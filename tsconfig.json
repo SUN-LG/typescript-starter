@@ -19,7 +19,7 @@
     // https://github.com/Microsoft/TypeScript/issues/27318
     "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": ["./src/*"]
     }
   },
 }

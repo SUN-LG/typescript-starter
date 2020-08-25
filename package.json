@@ -6,7 +6,8 @@
   "scripts": {
     "test": "jest --bail --coverage",
     "changelog": "rimraf CHANGELOG.md && conventional-changelog -p angular -i CHANGELOG.md -s",
-    "build": "npm run lint && npm run prettier && npm run test && rimraf dist types && gulp",
+    "prebuild": "npm run lint && npm run prettier && npm run test",
+    "build": "rimraf dist types && gulp",
     "lint": "eslint src test --cache --max-warnings 0",
     "prettier": "prettier src --write"
   },

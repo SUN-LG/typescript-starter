@@ -26,7 +26,7 @@ module.exports = {
     { value: 'WIP', name: 'WIP:      Work in progress' },
   ],
 
-  scopes: [{ name: 'build' }],
+  scopes: [{ name: 'build' }, { name: 'framework' }],
 
   allowTicketNumber: false,
   isTicketNumberRequired: false,
