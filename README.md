@@ -45,18 +45,20 @@ husky > commit-msg hook failed (add --no-verify to bypass)
 
 ### Typescript
 
-本项目会构建输出 CommonJS 工具包（npm包）供外部使用，采用 Typescript 设计并输出声明文件，有助于外部更好的使用该资源包。
+本项目会构建输出 CommonJS 工具包（npm包）供外部使用，采用 Typescript 设计并输出声明文件，有助于外部更好的使用该资源包。除此之外，typescript 可以避免 JavaScript 动态特性所带来的一些无法预料的错误（具体可查看 [Top 10 JavaScript errors from 1000+ projects (and how to avoid them)](https://rollbar.com/blog/top-10-javascript-errors/)）
 
 TypeScript 的构建方式有很多种，除了原生编译器 tsc 以外，还包括 Webpack、Rollup、 Babel 以及 Gulp 等（更多构建工具的集成可查看 [Integrating with Build Tools](https://www.typescriptlang.org/docs/handbook/integrating-with-build-tools.html):
 
 - webpack 主要用于页面应用模块化构建，使用webpack构建后增加库的体积，因此工具库制作使用webpack完全是“杀鸡用牛刀”
-- Rollup 是一个轻量的构建构建库的打包器，支持- Babel 对应Typescript可以使用 [@babel/preset-typescript](https://babeljs.io/docs/en/babel-preset-typescript) 去除 TypeScript 类型标记，但是做不到类型编译检查，更多关于 Babel 对于 TypeScript 支持的限制可查看 [@babel/plugin-transform-typescript - Caveats](https://www.babeljs.cn/docs/babel-plugin-transform-typescript#caveats)。
+- Rollup 是一个轻量的构建构建库的打包器，它支持 [Tree Shaking](https://github.com/rollup/rollup)，以及 [ES Module](https://github.com/rollup/rollup/wiki/ES6-modules)，被广泛应用于，react、Vue等库的开发。
+- Babel 对应Typescript可以使用 [@babel/preset-typescript](https://babeljs.io/docs/en/babel-preset-typescript) 去除 TypeScript 类型标记，但是做不到类型编译检查，更多关于 Babel 对于 TypeScript 支持的限制可查看 [@babel/plugin-transform-typescript - Caveats](https://www.babeljs.cn/docs/babel-plugin-transform-typescript#caveats) 或 [Babel 7 or TypeScript](https://kulshekhar.github.io/ts-jest/user/babel7-or-ts)。
 - Gulp 是一个非常轻量的，并且也是Typescript官方推荐的构建工具，具体可以查看 [TypeScript - Building](https://github.com/microsoft/TypeScript#building)，简单的 Gulp 配置可查看 [TypeScript 中文网 - Gulp](https://www.tslang.cn/docs/handbook/gulp.html)。
 
+> 温馨提示：更多构建工具可以了解 [esbuild](https://github.com/evanw/esbuild)、[parcel](https://github.com/parcel-bundler/parcel)以及 [backpack](https://github.com/jaredpalmer/backpack) 等。
 
 #### Typescript 配置
 
-Typescript 编译采用官方推荐的 Gulp 工具，配合 [gulp-typescript](https://github.com/ivogabe/gulp-typescript) 和 [tsconfig.json](https://www.tslang.cn/docs/handbook/tsconfig-json.html) 配置文件，可快速进行项目构建。在根目录下新建 `tsconfig.json` 文件并新增以下配置： [Tree Shaking](https://github.com/rollup/rollup) 以及可构建输出 [ES Module](https://github.com/rollup/rollup/wiki/ES6-modules) 的特性使得它被 tsdx、microbundle 甚至 Vue 等广泛使用。
+Typescript 编译采用官方推荐的 Gulp 工具，配合 [gulp-typescript](https://github.com/ivogabe/gulp-typescript) 和 [tsconfig.json](https://www.tslang.cn/docs/handbook/tsconfig-json.html) 配置文件，可快速进行项目构建。在根目录下新建 `tsconfig.json` 文件并新增以下配置： 
 
 
 ```javascript
@@ -101,7 +103,7 @@ gulp.task("default", function () {
 },
 ```
 
-其中 [rimraf](https://github.com/isaacs/rimraf) 用于构建前清除 dist 目录中的文件。使用 `npm run build` 命令，构建编译 `src` 下的 typescript 源码并输出 CommonJS 规范的代码到 `dist` 目录下。
+其中 [rimraf](https://github.com/isaacs/rimraf) 用于构建之前清除 dist 目录中的文件。使用 `npm run build` 命令，构建编译 `src` 下的 typescript 源码并输出 CommonJS 规范的代码到 `dist` 目录下。
 
 除此之外，项目希望可以快速生成声明文件供外部调用，进行代码提示。此时仍然可以借助 `gulp-typescript` 工具自动生成声明文件。在 `gulpfile.js` 中新增以下配置：
 
@@ -153,7 +155,7 @@ gulp.task("default", function () {
 
 #### ESLint 背景
 
-TypeScript 的代码检查工具主要有 TSLint 和 ESLint 两种。早期的 TypeScript 项目一般采用 TSLint 进行检查，TSLint 和 TypeScript 采用同样的 AST 格式进行编译，但主要问题是对于 JavaScript 生态的项目支持不够友好，因此 TypeScript 团队在 2019 年宣布全面转向 ESLint，更多关于转向 ESLint 的原因可查看：
+TypeScript 的代码检查工具主要有 TSLint 和 ESLint 两种。早期的 TypeScript 项目一般采用 TSLint 进行检查，TSLint 和 TypeScript 采用同样的 AST 格式进行编译，但主要问题是对于 JavaScript 生态的项目支持不够友好，因此 TypeScript 团队在 2019 年宣布全面转向 ESLint（具体可查看 TypeScript 官方仓库的 [`.eslintrc.json`](https://github.com/microsoft/TypeScript/blob/master/.eslintrc.jso) 配置），更多关于转向 ESLint 的原因可查看：
 
 - <https://medium.com/palantir/tslint-in-2019-1a144c2317a9>
 - <https://github.com/microsoft/TypeScript/issues/30553>
@@ -202,7 +204,9 @@ npm i --save-dev eslint @typescript-eslint/parser @typescript-eslint/eslint-plug
 配置完成后在 `package.json` 中设置校验命令
 
 ```javascript
-"lint": "eslint src",
+"scripts": {
+  "lint": "eslint src",
+}
 ```
 
 此时如果在 `src` 目录下书写错误的语法，执行 `npm run lint` 就会输出错误信息：
@@ -243,6 +247,18 @@ dist
 types
 ```
 
+除此之外，需要在构建前进行 ESLint 校验，一旦 ESLint 校验不通过则不允许进行源码的构建操作：
+
+```javascript
+"scripts": {
+  "lint": "eslint src --max-warnings 0",
+  "build": "npm run lint && rimraf dist types && gulp",
+}
+```
+
+需要注意在构建时需要进行校验的严格控制，一旦 lint 抛出 warning 或者 error 则立马终止构建（详情可查看 [ESLint 退出代码](https://cn.eslint.org/docs/user-guide/command-line-interface#exit-codes)）。
+
+> 温馨提示：需要注意 Shell 中的 `&&` 和 `&` 是有差异的，`&&` 主要用于顺序执行，如果其中一个脚本失败退出那么整个组合脚本执行失败，`&` 主要用于并发执行，表示两个脚本同时执行。这里构建的命令需要等待 `lint` 命令执行通过才能进行，一旦 `lint` 失败那么构建命令将不再执行。
 
 
 #### ESlint vscode 插件
@@ -252,6 +268,7 @@ types
 ![eslint-error](eslint-error.jpg)
 
 此时可以发现之前执行 `lint` 命令的错误通过插件的形式可实时在 VS Code 编辑器中进行显示。除此之外，一些简单的 ESLint 格式错误（例如 多余的`;` 等）可通过配置 Save Auto Fix 进行保存自动格式化处理。具体 VS Code 的配置可参考 [ESLint 插件](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint)的文档说明，这边应该需要进行如下配置：
+
 ``` javascript
 "editor.codeActionsOnSave": {
   "source.fixAll": true,
@@ -386,10 +403,10 @@ The following rules are unnecessary or might conflict with Prettier:
 使用[commitlint](https://commitlint.js.org/#/)可以防止生成不规范的 Git Commit Message，从而阻止用户进行Git代码提交。单随之项目的增大，全量代码检测则会成为一个问题。[Lint-Stated](https://github.com/okonet/lint-staged)，可以在用户提交代码之前，使用ESLint检测Git暂存区的代码（`git add` 之后的发生变化的文件），一旦存在 💩 一样不符合校验规则的代码，则可以终止提交行为。根据官方文档执行以下命令自动生成配置项信息：
 
 ```shell
-npm mrm lint-staged
+npx mrm lint-staged
 ```
 
-需要注意默认生成的配置文件是针对 JavaScript 环境的，手动修改 `package.json` 中的配置信息：
+需要注意默认生成的配置文件是针对 JavaScript 环境的，手动修改 `package.json` 中的配置信息，适配 Typescript：
 
 ```javascript
 "husky": {
@@ -451,6 +468,287 @@ husky > pre-commit hook failed (add --no-verify to bypass)
 ```
 
 husky 在 `package.json` 中配置了 `pre-commit` 和 `commit-msg` 两个[Git 钩子](https://git-scm.com/book/en/v2/Customizing-Git-Git-Hooks)，pre-commit 钩子会优先执行ESLint校验，如果校验失败终止运行。pre-commit 钩子执行完后会继续执行 commit-msg 钩子校验 Git Commit Message 是否符合规范，如果不符合规范终止提交。
+
+
+### Jest
+
+#### Jest 配置
+
+本项目的单元测试采用 [Jest](https://jestjs.io/en/) 测试框架，注意如果需要对 Typescript 进行支持，可以通过配合 Babel 使用，具体查看 [Jest - Using TypeScript](https://jestjs.io/docs/en/getting-started#using-typescript), 当然这产生了一些限制（具体可查看 [Babel 7 or TypeScript](https://kulshekhar.github.io/ts-jest/user/babel7-or-ts)）。由于本项目没有采用 Babel 进行转义，并希望能够完美支持类型检查，因此采用了 [ts-jest](https://kulshekhar.github.io/ts-jest/user/install#customizing)。按照官方教程进行安装并初始化：
+
+``` shell
+npm install --save-dev jest ts-jest @types/jest
+npx ts-jest config:init
+```
+
+修改 `jest.config.js` 配置文件：
+```javascript
+module.exports = {
+  preset: "ts-jest",
+  testEnvironment: "node",
+  // 输出覆盖信息文件的目录
+  coverageDirectory: "./coverage/",
+  // 覆盖信息的忽略文件模式
+  testPathIgnorePatterns: ["<rootDir>/node_modules/"],
+  // 如果测试覆盖率未达到 100%，则测试失败
+  // 这里可用于预防代码构建和提交
+  coverageThreshold: {
+    global: {
+      branches: 100,
+      functions: 100,
+      lines: 100,
+      statements: 100,
+    },
+  },
+  // 路径映射配置，具体可查看 https://kulshekhar.github.io/ts-jest/user/config/#paths-mapping
+  // 需要配合 TypeScript 路径映射，具体可查看：https://www.tslang.cn/docs/handbook/module-resolution.html
+  moduleNameMapper: {
+    "^@/(.*)$": "<rootDir>/src/$1",
+  },
+};
+```
+
+需要注意路径映射需要 tsconfig.json 同时配置了 `paths` 信息，同时注意将测试代码包含到 TS 的编译目录中。配置完成后在 `package.json` 中配置测试命令：
+
+```javascript
+"scripts": {
+  "lint": "eslint src --max-warnings 0",
+  "test": "jest --bail --coverage",
+  "build": "npm run lint && npm run jest && rimraf dist types && gulp",
+}
+```
+
+jest的命令行参数，可查看[Jest CLI Options](https://jestjs.io/docs/zh-Hans/cli)：
+
+- `bail` 配置作用类型与 ESlint 中的 `max-warning`，表明一旦反向单元测试用例错误就停止运行剩余测试用例，从而可以防止运行用例过多，需要一直等待所有用例运行完毕。
+- `coverage` 用于在当前根目录下生产 coverage 测试报告。
+
+> 温馨提示：Jest CLI Options 中的 `findRelatedTests` 可用于配合 `pre-commit` 钩子去运行最少量的单元测试用例，可配合 `lint-staged` 实现类似于 ESLint 的作用，更多细节可查看 [`lint-staged - Use environment variables with linting commands`](https://github.com/okonet/lint-staged#use-environment-variables-with-linting-commands)。
+> 温馨提示：配置 tsconfig.json 时，尽量不要设置 `include`、`exclude`、`files` 等选项，除非你明确的知道自己需要配置这些字段，并且明白他们的作用。因为当你配置了 `baseUrl` 和 `paths` 进行路径映射后，`include`、`exclude`、`files` 有可能将你的路径映射目录排除在 ts 的编译目录之外。造成 ts 或 vscode 无法智能提示。
+
+在根目录的 `test` 目录下新建 `greet.spec.ts` 文件，并设计以下测试代码：
+
+```javascript
+import Greeter from '@/greet'
+
+describe("src/greet.ts", () => {
+  const greeter = new Greeter('world')
+
+  it("name param test", () => {
+    expect(greeter.greet()).toBe("hello, from world 1")
+  })
+})
+```
+
+> 温馨提示：测试文件有两种放置风格，一种是新建 `test` 文件夹，然后将所有的测试代码集中在 `test` 目录下进行管理，另外一种是在各个源码文件的同级目录下新建 `__test__` 目录，进行就近测试，大部分的项目可能都会倾向采用第一种目录结构（可以随便找一些 github 上的开源项目进行查看，这里 `ts-test` 则是采用了第二种测试结构）。除此之外，需要注意的一点是 Jest 通过配置 [`testMatch`](https://jestjs.io/docs/zh-Hans/configuration#testmatch-arraystring) 或 [`testRegex`](https://jestjs.io/docs/zh-Hans/configuration#testregex-string--arraystring) 可以使得项目识别特定格式文件作为测试文件进行运行（本项目采用默认配置可识别后缀为 `.spec` 的文件进行单元测试）。
+
+此时可单独通过执行 `npm run test` 命令进行单元测试，这里演示执行构建命令时的单元测试（需要保证构建之前所有的单元测试用例都能通过）。如果测试失败，那么应该防止继续构建，例如进行失败的构建行为：
+
+```javascript
+PS C:\Code\Git\algorithms> npm run build
+> algorithms-utils@1.0.0 build C:\Code\Git\algorithms
+> npm run lint-strict && npm run jest && rimraf dist types && gulp
+> algorithms-utils@1.0.0 lint-strict C:\Code\Git\algorithms
+> eslint src --max-warnings 0
+> algorithms-utils@1.0.0 jest C:\Code\Git\algorithms
+> jest --coverage
+ PASS  dist/test/greet.spec.js
+ FAIL  test/greet.spec.ts
+  ● src/greet.ts › name param test
+    expect(received).toBe(expected) // Object.is equality
+    Expected: "Hello from world 1"
+    Received: "Hello from world"
+      3 | describe("src/greet.ts", () => {
+      4 |   it("name param test", () => {
+    > 5 |     expect(greet("world")).toBe("Hello from world 1");
+        |                            ^
+      6 |   });
+      7 | });
+      8 |
+      at Object.<anonymous> (test/greet.spec.ts:5:28)
+----------|---------|----------|---------|---------|-------------------
+| File       | % Stmts   | % Branch   | % Funcs   | % Lines   | Uncovered Line #s   |
+| ---------- | --------- | ---------- | --------- | --------- | ------------------- |
+| All files  | 100       | 100        | 100       | 100       |
+| greet.ts   | 100       | 100        | 100       | 100       |
+| ---------- | --------- | ---------- | --------- | --------- | ------------------- |
+Test Suites: 1 failed, 1 passed, 2 total
+Tests:       1 failed, 1 passed, 2 total
+Snapshots:   0 total
+Time:        3.45 s
+Ran all test suites.
+npm ERR! code ELIFECYCLE
+npm ERR! errno 1
+npm ERR! algorithms-utils@1.0.0 jest: `jest --coverage`
+npm ERR! Exit status 1
+npm ERR!
+npm ERR! Failed at the algorithms-utils@1.0.0 jest script.
+npm ERR! This is probably not a problem with npm. There is likely additional logging output above.
+npm ERR! A complete log of this run can be found in:
+npm ERR!     C:\Users\子弈\AppData\Roaming\npm-cache\_logs\2020-07-12T13_42_11_628Z-debug.log
+npm ERR! code ELIFECYCLE
+npm ERR! errno 1
+npm ERR! algorithms-utils@1.0.0 build: `npm run lint-strict && npm run jest && rimraf dist types && gulp`
+npm ERR! Exit status 1
+npm ERR!
+npm ERR! Failed at the algorithms-utils@1.0.0 build script.
+npm ERR! This is probably not a problem with npm. There is likely additional logging output above.
+npm ERR! A complete log of this run can be found in:
+npm ERR!     C:\Users\子弈\AppData\Roaming\npm-cache\_logs\2020-07-12T13_42_11_673Z-debug.log
+```
+
+除此之外为了预防不负责任的代码提交，此时配合 `lint-staged` 可以阻止未跑通单元测试的代码进行远程提交：
+
+```javascript
+"scripts": {
+  "lint": "eslint src --max-warnings 0",
+  "test": "jest --bail --coverage",
+},
+"lint-staged": {
+  "*.ts": [
+    "npm run lint",
+    "npm run test"
+  ]
+}
+```
+
+此时如果单元测试有误（不管是源码逻辑有问题还是单元测试用例本身设计有问题），都会停止代码提交：
+```javascript
+husky > pre-commit (node v12.13.1)
+[STARTED] Preparing...
+[SUCCESS] Preparing...
+[STARTED] Running tasks...
+[STARTED] Running tasks for *.ts
+[STARTED] npm run lint
+[SUCCESS] npm run lint
+[STARTED] npm run jest
+[FAILED] npm run jest [FAILED]
+[FAILED] npm run jest [FAILED]
+[SUCCESS] Running tasks...
+[STARTED] Applying modifications...
+[SKIPPED] Skipped because of errors from tasks.
+[STARTED] Reverting to original state because of errors...
+[SUCCESS] Reverting to original state because of errors...
+[STARTED] Cleaning up...
+[SUCCESS] Cleaning up...
+× npm run jest:
+FAIL test/greet.spec.ts
+  src/greet.ts
+    × name param test (4 ms)
+  ● src/greet.ts › name param test
+    expect(received).toBe(expected) // Object.is equality
+    Expected: "Hello from world 1"
+    Received: "Hello from world"
+      3 | describe("src/greet.ts", () => {
+      4 |   it("name param test", () => {
+    > 5 |     expect(greet("world")).toBe("Hello from world 1");
+        |                            ^
+      6 |   });
+      7 | });
+      8 |
+      at Object.<anonymous> (test/greet.spec.ts:5:28)
+Test Suites: 1 failed, 1 total
+Tests:       1 failed, 1 total
+Snapshots:   0 total
+Time:        1.339 s, estimated 3 s
+Ran all test suites related to files matching /C:\\Code\\Git\\algorithms\\src\\index.ts|C:\\Code\\Git\\algorithms\\test\\greet.spec.ts/i.
+npm ERR! code ELIFECYCLE
+npm ERR! errno 1
+npm ERR! algorithms-utils@1.0.0 jest: `jest --bail --findRelatedTests --coverage "C:/Code/Git/algorithms/src/index.ts" "C:/Code/Git/algorithms/test/greet.spec.ts"`
+npm ERR! Exit status 1
+npm ERR!
+npm ERR! Failed at the algorithms-utils@1.0.0 jest script.
+npm ERR! This is probably not a problem with npm. There is likely additional logging output above.
+npm ERR! A complete log of this run can be found in:
+npm ERR!     C:\Users\子弈\AppData\Roaming\npm-cache\_logs\2020-07-12T14_33_51_183Z-debug.log
+> algorithms-utils@1.0.0 jest C:\Code\Git\algorithms
+npm ERR! Exit status 1
+npm ERR!
+npm ERR! Failed at the algorithms-utils@1.0.0 jest script.
+npm ERR! This is probably not a problem with npm. There is likely additional logging output above.
+npm ERR! A complete log of this run can be found in:
+npm ERR!     C:\Users\子弈\AppData\Roaming\npm-cache\_logs\2020-07-12T14_33_51_183Z-debug.log
+> algorithms-utils@1.0.0 jest C:\Code\Git\algorithms
+> jest --bail --findRelatedTests --coverage "C:/Code/Git/algorithms/src/index.ts" "C:/Code/Git/algorithms/test/greet.spec.ts"
+----------|---------|----------|---------|---------|-------------------
+| File       | % Stmts   | % Branch   | % Funcs   | % Lines   | Uncovered Line #s   |
+| ---------- | --------- | ---------- | --------- | --------- | ------------------- |
+| All files  | 0         | 0          | 0         | 0         |
+| ---------- | --------- | ---------- | --------- | --------- | ------------------- |
+husky > pre-commit hook failed (add --no-verify to bypass)
+git exited with error code 1
+```
+> 温馨提示：更多关于Jest的生态，可以查看 [awesome-jest](https://github.com/jest-community/awesome-jest)。
+
+#### ESLint 的支持
+
+`src` 目录下的源码通过配置 `@typescript-eslint/eslint-plugin` 可进行推荐规则的 ESLint 校验，`test` 目录下的测试代码可以配置符合 Jest 推荐规则的 ESLint 校验，可以通过配置 [eslint-plugin-jest](https://github.com/jest-community/eslint-plugin-jest) 进行支持（`ts-jest` 项目就是采用了该插件进行 ESLint 校验，具体可查看配置文件 [`ts-jest/.eslintrc.js`](https://github.com/kulshekhar/ts-jest/blob/master/.eslintrc.js#L12)）。这里仍然采用推荐规则配置：
+
+```javascript
+module.exports = {
+  root: true,
+  parser: "@typescript-eslint/parser",
+  plugins: ["@typescript-eslint"],
+  extends: [
+    "eslint:recommended",
+    "plugin:@typescript-eslint/recommended",
+    // 新增推荐的 ESLint 校验规则
+    // 所有规则集查看：https://github.com/jest-community/eslint-plugin-jest#rules（recommended 标识表明是推荐规则）
+    "plugin:jest/recommended",
+  ],
+};
+```
+
+为了验证推荐规则是否生效，这里可以找一个 [`no-identical-title`](https://github.com/jest-community/eslint-plugin-jest/blob/master/docs/rules/no-identical-title.md) 规则进行验证：
+
+```javascript
+import greet from "@/greet";
+describe("src/greet.ts", () => {
+  it("name param test", () => {
+    expect(greet("world")).toBe("Hello from world 1");
+  });
+});
+// 这里输入了重复的 title
+describe("src/greet.ts", () => {
+  it("name param test", () => {
+    expect(greet("world")).toBe("Hello from world 1");
+  });
+});
+```
+
+需要注意修改 `package.json` 中的 ESLint 校验范围：
+
+```javascript
+"scripts": {
+  // 这里对 src 和 test 目录进行 ESLint 校验
+  "lint": "eslint src test --max-warnings 0",
+},
+```
+
+执行 `npm run lint` 进行单元测试的格式校验：
+
+```javascript
+PS C:\Code\Git\algorithms> npm run lint
+> algorithms-utils@1.0.0 lint C:\Code\Git\algorithms
+> eslint src test --max-warnings 0
+C:\Code\Git\algorithms\test\greet.spec.ts
+  9:10  error  Describe block title is used multiple times in the same describe block  jest/no-identical-title
+✖ 1 problem (1 error, 0 warnings)
+npm ERR! code ELIFECYCLE
+npm ERR! errno 1
+npm ERR! algorithms-utils@1.0.0 lint: `eslint src test --max-warnings 0`
+npm ERR! Exit status 1
+npm ERR!
+npm ERR! Failed at the algorithms-utils@1.0.0 lint script.
+npm ERR! This is probably not a problem with npm. There is likely additional logging output above.
+npm ERR! A complete log of this run can be found in:
+npm ERR!     C:\Users\子弈\AppData\Roaming\npm-cache\_logs\2020-07-13T02_25_12_043Z-debug.log
+```
+
+采用ESLint校验之后，在 VS Code 中也实时生成了错误提示（相应的代码下会有红色波浪线，鼠标移入后会产生 Tooltip 提示该错误的相应规则信息，除此之外当前工程目录下对应的文件名也会变成红色）
+
+> 温馨提示：如果你希望 Jest 测试代码也需要一些格式规范，可以查看 [eslint-plugin-jest-formatting](https://github.com/dangreenisrael/eslint-plugin-jest-formatting) 插件。
+
 
 ## 文档
 

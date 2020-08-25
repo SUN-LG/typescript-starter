@@ -4,7 +4,7 @@ class Greeter {
     this.greeting = message;
   }
   public greet(): string {
-    return "Hello, " + this.greeting;
+    return 'Hello, from ' + this.greeting;
   }
 }
 

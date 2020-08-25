@@ -11,13 +11,15 @@
     // 禁止对同一个文件的不一致的引用
     "forceConsistentCasingInFileNames": true,
     // 报错时不生成输出文件
-    "noEmitOnError": true
+    "noEmitOnError": true,
+
+    // 路径映射，引导 ts 加载对应路径的模块
+    // 注意：不要随便设置 include 和 exclude 选项，有可能影响到 ts 解析映射路径
+    // 例如：import Greeter from '@/greet' ===> Cannot find module '@/greet' or its corresponding type declarations.
+    // https://github.com/Microsoft/TypeScript/issues/27318
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"]
+    }
   },
-  "include": [
-      "src/**/*"
-  ],
-  "exclude": [
-      "node_modules",
-      "**/*.spec.ts"
-  ]
 }
